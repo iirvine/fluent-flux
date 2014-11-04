@@ -1,0 +1,26 @@
+{
+  "name": "fluent-flux",
+  "version": "0.0.0",
+  "description": "An experimental implementation of Facebook's \"flux\" architecture",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iirvine/fluent-flux.git"
+  },
+  "author": "Ian Irvine",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/iirvine/fluent-flux/issues"
+  },
+  "homepage": "https://github.com/iirvine/fluent-flux",
+  "dependencies": {
+    "es6-map": "^0.1.1",
+    "object-assign": "^1.0.0"
+  }
+}

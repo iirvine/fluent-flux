@@ -6,73 +6,7 @@ Fluent is a still-experimental implementation of Facebook's unidirectional [flux
 
 ##Key Differences
 
-###No Constants
-Maintaining an ever-growing ActionTypes enum in "vanilla" flux quickly became bothersome and error-prone - as did the nasty switch statement each store had to declare to act on those actions. Fluent takes a page out of reflux's book and treats action functions as first-class citizens - but unlike reflux, all actions are still pumped through a central dispatcher. Stores declare their interest in different actions by declaring handlers and registering them with the dispatcher.
-
-*users/UserActions.js*
-```js
-var Dispatcher = require('../common/dispatcher');
-var API = require('../common/API');
-
-var UserActions = Dispatcher.createActions({
-  buttonClicked(user) {
-    console.log(`${this.displayName()}(...): You clicked the user button!!`)
-    
-    this.dispatch({user});
-    
-    API.fetchUser(user)
-      .then(UserActions.receiveUser);
-  }, 
-
-  receiveUser(user) {
-    this.dispatch({user});
-  }
-});
-
-module.exports = UserActions
-```
-
-*users/UserStore*
-```js
-var fluent = require('fluent-flux');
-var { handler, ALL_ACTIONS } = fluent;
-
-var { buttonClicked, receiveUser } = require('./UserActions');
-var Dispatcher = require('../common/dispatcher');
-
-var currentUser = null;
-
-var UserStore = fluent.createStore({
-  displayName: "UserStore",
-  get() {
-    return currentUser;
-  },
-});
-
-UserStore.handlers(
-  handler(ALL_ACTIONS, (action, params) => {
-    console.log("This special handler gets called for every event dispatched!");
-  }),
-
-  handler(buttonClicked, (params) => {
-    console.log("Fetching user...")
-    UserStore.setPending();
-  }),
-  
-  handler(receiveUser, (params) => {
-    currentUser = {params};
-    UserStore.resolve();
-  })
-);
-
-UserStore.dispatchToken = Dispatcher.register(UserStore.handlers());
-
-module.exports = UserStore
-```
-
-Under the hood, Fluent implements this API using ES6 Maps - a store's handlers are stored in a dispatch table, keyed on the actions each handler cares about. The dispatcher uses the object identity of each action being dispatched to route actions to the appropriate handlers.
-
-###Factory Functions
+For example purposes, here's a portion of a trivial app implemented according to the vanilla flux specification:
 
 __Flux__
 
@@ -89,7 +23,7 @@ module.exports = {
 };
 ```
 
-*actions/UserActionCreators*
+*actions/UserActionCreators.js*
 ```js
 var Dispatcher = require('../common/dispatcher');
 var Constants = require('../constants/Constants');
@@ -122,18 +56,6 @@ module.exports = UserActions = {
 
 *stores/UserStore.js*
 ```js
-/**
- * This file is provided by Facebook for testing and evaluation purposes
- * only. Facebook reserves all rights not expressly granted.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
-
 var Dispatcher = require('../common/dispatcher');
 var Constants = require('../constants/Constants');
 var EventEmitter = require('events').EventEmitter;
@@ -192,6 +114,81 @@ UserStore.dispatchToken = Dispatcher.register(function(payload) {
 
 module.exports = MessageStore;
 ```
+
+Here's the same functionality implemented with fluent:
+
+__Fluent__
+
+*users/UserActions.js*
+```js
+var Dispatcher = require('../common/dispatcher');
+var API = require('../common/API');
+
+var UserActions = Dispatcher.createActions({
+  buttonClicked(user) {
+    console.log(`${this.displayName()}(...): You clicked the user button!!`)
+    
+    this.dispatch({user});
+    
+    API.fetchUser(user)
+      .then(UserActions.receiveUser);
+  }, 
+
+  receiveUser(user) {
+    this.dispatch({user});
+  }
+});
+
+module.exports = UserActions
+```
+
+*users/UserStore.js*
+```js
+var fluent = require('fluent-flux');
+var { handler, ALL_ACTIONS } = fluent;
+
+var { buttonClicked, receiveUser } = require('./UserActions');
+var Dispatcher = require('../common/dispatcher');
+
+var currentUser = null;
+
+var UserStore = fluent.createStore({
+  displayName: "UserStore",
+  get() {
+    return currentUser;
+  },
+});
+
+UserStore.handlers(
+  handler(ALL_ACTIONS, (action, params) => {
+    console.log("This special handler gets called for every event dispatched!");
+  }),
+
+  handler(buttonClicked, (params) => {
+    console.log("Fetching user...")
+    UserStore.setPending();
+  }),
+  
+  handler(receiveUser, (params) => {
+    currentUser = {params};
+    UserStore.resolve();
+  })
+);
+
+UserStore.dispatchToken = Dispatcher.register(UserStore.handlers());
+
+module.exports = UserStore
+```
+
+###No Constants
+Maintaining an ever-growing ActionTypes enum in "vanilla" flux quickly became bothersome and error-prone - as did the nasty switch statement each store had to declare to act on those actions. Fluent takes a page out of reflux's book and treats action functions as first-class citizens - but unlike reflux, all actions are still pumped through a central dispatcher. Stores declare their interest in different actions by declaring handlers and registering them with the dispatcher.
+
+
+Under the hood, Fluent implements this API using ES6 Maps - a store's handlers are stored in a dispatch table, keyed on the actions each handler cares about. The dispatcher uses the object identity of each action being dispatched to route actions to the appropriate handlers.
+
+###Factory Functions
+
+
 
 
 ###Queued Dispatches

@@ -1,9 +1,9 @@
 var Map = require('es6-map');
-var invariant = require('react/lib/invariant');
-var warning = require('react/lib/warning');
+var invariant = require('./lib/invariant');
+var warning = require('./lib/warning');
 
 var Dispatch = require('./Dispatch');
-var createActions = require('./createActions');
+var createActions = require('./lib/createActions');
 
 var lastId = 1;
 var IS_DISPATCHING = false

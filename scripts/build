@@ -1,0 +1,2 @@
+NODE_ENV=production node_modules/.bin/browserify src/index.js -t envify -t es6ify -s fluent > dist/fluent-flux.js
+node_modules/.bin/uglifyjs dist/fluent-flux.js --compress warnings=false > dist/fluent-flux.min.js

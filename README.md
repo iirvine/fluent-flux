@@ -146,7 +146,7 @@ As cascading actions can make your application more difficult to understand, the
 Feedback would be much appreciated! Feel free to file an issue or hit me up on twitter @ianirvine.
 
 ###TODO
-[ ] Decide whether any part of this is a terrible idea
-[ ] Documentation
-[ ] Tests 
-[ ] Mixins
+  [ ] Decide whether any part of this is a terrible idea
+  [ ] Documentation
+  [ ] Tests 
+  [ ] Mixins

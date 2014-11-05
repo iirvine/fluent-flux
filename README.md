@@ -2,122 +2,11 @@
 
 Fluent is a still-experimental implementation of Facebook's unidirectional [flux architecture](https://facebook.github.io/flux/). It takes some cues from libraries like [reflux](https://github.com/spoike/refluxjs) and provides a few conveniences/niceties on top of the original [reference implementation](https://github.com/facebook/flux), but without straying too far from the original precepts.
 
-*Note*: Fluent has yet to leave the "I'm not sure this is a good idea phase" - use it at your own risk. 
+*Note*: Fluent has yet to leave the "I'm not sure this is a good idea phase" - feel free to mess around with it, but I wouldn't use it in production just yet...
 
-##Key Differences
+##Example
 
-For example purposes, here's a portion of a trivial app implemented according to the vanilla flux specification:
-
-__Flux__
-
-*Constants/Constants.js*
-```js
-var keyMirror = require('react/lib/keyMirror');
-
-module.exports = {
-
-  ActionTypes: keyMirror({
-    USER_BUTTON_CLICKED: null,
-    RECEIVE_USER: null
-  })
-};
-```
-
-*actions/UserActionCreators.js*
-```js
-var Dispatcher = require('../common/dispatcher');
-var Constants = require('../constants/Constants');
-var API = require('../common/API');
-var UserStore = require('../stores/UserStore');
-
-var ActionTypes = Constants.ActionTypes;
-
-module.exports = UserActions = {
-
-  buttonClicked: function(username) {
-    Dispatcher.dispatch({
-      type: ActionTypes.USER_BUTTON_CLICKED,
-      username: username
-    });
-
-    API.fetchUser(username)
-        .then(UserActions.receiveUser);
-  }
-
-  receiveUser: function(user) {
-    Dispatcher.dispatch({
-        type: ActionTypes.RECEIVE_USER,
-        user: user
-    });
-  }
-
-};
-```
-
-*stores/UserStore.js*
-```js
-var Dispatcher = require('../common/dispatcher');
-var Constants = require('../constants/Constants');
-var EventEmitter = require('events').EventEmitter;
-var assign = require('object-assign');
-
-var ActionTypes = Constants.ActionTypes;
-var CHANGE_EVENT = 'change';
-var PENDING_TOKEN = '__PENDING__';
-
-var user = null;
-
-var UserStore = assign({}, EventEmitter.prototype, {
-
-  emitChange: function() {
-    this.emit(CHANGE_EVENT);
-  },
-
-  /**
-   * @param {function} callback
-   */
-  addChangeListener: function(callback) {
-    this.on(CHANGE_EVENT, callback);
-  },
-
-  get: function(id) {
-    return _messages[id];
-  },
-
-  isPending: function() {
-    return this.pendingToken == PENDING_TOKEN;
-  }
-});
-
-UserStore.dispatchToken = Dispatcher.register(function(payload) {
-  var action = payload.action;
-
-  switch(action.type) {
-
-    case ActionTypes.USER_BUTTON_CLICKED:
-      console.log("You clicked the user button! Fetching user " + action.username);
-      UserStore.pendingToken = PENDING_TOKEN;
-      UserStore.emitChange();
-      break;
-
-    case ActionTypes.RECEIVE_USER:
-      user = action.user;
-      UserStore.pendingToken = null;
-      UserStore.emitChange();
-      break;
-
-    default:
-      // do nothing
-  }
-
-});
-
-module.exports = MessageStore;
-```
-
-Here's the same functionality implemented with fluent:
-
-__Fluent__
+Here's a portion of a trivial app implemented with fluent:
 
 *users/UserActions.js*
 ```js
@@ -180,18 +69,84 @@ UserStore.dispatchToken = Dispatcher.register(UserStore.handlers());
 module.exports = UserStore
 ```
 
-###No Constants
-Maintaining an ever-growing ActionTypes enum in "vanilla" flux quickly became bothersome and error-prone - as did the nasty switch statement each store had to declare to act on those actions. Fluent takes a page out of reflux's book and treats action functions as first-class citizens - but unlike reflux, all actions are still pumped through a central dispatcher. Stores declare their interest in different actions by declaring handlers and registering them with the dispatcher.
+*app.jsx*
+```js
+var React = require('react');
+var fluent = require('fluent-flux');
+var assign = require('object-assign');
 
+var { UserActions, UserStore } = require('./users');
+
+var App = React.createClass({
+  getInitialState() {
+    return assign({userString: ""}, this.getStateFromStores());
+  },
+
+  getStateFromStores() {
+    return {
+      user: UserStore.get(),
+      loading: fluent.anyPending(UserStore)
+    }
+  },
+
+  componentDidMount() {
+    UserStore.addChangeListener(this.onChange);
+  },
+
+  onChange() {
+    this.setState(this.getStateFromStores())
+  },
+
+  userInputChanged() {
+    this.setState({userString: this.refs.userInput.getDOMNode().value});
+  },
+
+  userButtonClicked() {
+    UserActions.buttonClicked(this.state.userString);
+  },
+
+  render() {
+    return (
+      <div>
+        <input ref="userInput"
+          type="text"
+          placeholder="Username" 
+          onChange={this.userInputChanged}/>
+
+        <button onClick={this.userButtonClicked}>User Button</button>
+        <div>{this.state.loading ? "Loading..." : "Loaded."}</div>
+        <div>Current User: {this.state.user}</div>
+      </div>
+    )
+  }
+})
+
+React.render(
+  <App/>,
+  document.body
+)
+```
+
+##Key Differences
+
+###No Constants
+Maintaining an ever-growing ActionTypes enum in "vanilla" flux seemed like an antipattern. It quickly became bothersome and error-prone - as did the nasty switch statement each store had to declare to act on those actions. Fluent takes a page out of reflux's book and treats action functions as first-class citizens - but unlike reflux, all actions are still pumped through a central dispatcher. Stores declare their interest in different actions by declaring handlers and registering them with the dispatcher.
 
 Under the hood, Fluent implements this API using ES6 Maps - a store's handlers are stored in a dispatch table, keyed on the actions each handler cares about. The dispatcher uses the object identity of each action being dispatched to route actions to the appropriate handlers.
 
 ###Factory Functions
-
-
-
+Due to being reference implementations, the original flux examples didn't have much abstraction to them. Fluent includes convenient factory functions for creating stores and actions, as well as helpers like `anyPending` to see if any stores have asynchronous operations pending, like an in-flight request.
 
 ###Queued Dispatches
 Like flux, Fluent uses a centralized dispatcher that manages the unidirectional flow of actions through the application. However, unlike flux, Fluent's dispatcher won't throw an exception if actions are dispatched concurrently - instead, the dispatcher will queue any actions fired during the current dispatch. These actions will be flushed once the current dispatch has completed.
 
 As cascading actions can make your application more difficult to understand, the dispatcher will log a warning to the console when it needs to queue an action.
+
+###Questions
+Feedback would be much appreciated! Feel free to file an issue or hit me up on twitter @ianirvine.
+
+###TODO
+[ ] Decide whether any part of this is a terrible idea
+[ ] Documentation
+[ ] Tests 
+[ ] Mixins

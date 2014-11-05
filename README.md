@@ -150,3 +150,4 @@ Feedback would be much appreciated! Feel free to file an issue or hit me up on t
 - [ ] Documentation
 - [ ] Tests 
 - [ ] Mixins
+- [ ] Publish to npm

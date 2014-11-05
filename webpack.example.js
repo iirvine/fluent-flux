@@ -12,7 +12,7 @@ module.exports = {
     },
     resolve: {
         alias: {
-            'fluent-flux': path.join(__dirname, "src", "index")
+            'fluent-flux': path.join(__dirname, "dist", "fluent-flux")
         }
     },
     module: {

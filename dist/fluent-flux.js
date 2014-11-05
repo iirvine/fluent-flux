@@ -1565,368 +1565,419 @@ module.exports = Object.assign || function (target, source) {
 };
 
 },{}],53:[function(require,module,exports){
-"use strict";
-var Dispatch = function Dispatch(payload) {
-  this.payload = payload;
-  this.isPending = {};
-  this.isHandled = {};
-};
-($traceurRuntime.createClass)(Dispatch, {dispatchToTable: function(id, table) {
-    var $__1 = this.payload,
-        action = $__1.action,
-        params = $__1.params;
-    if (table.has(action)) {
-      this.isPending[id] = true;
-      table.get(action).call(action, params);
-      this.isHandled[id] = true;
-      this.isPending[id] = false;
-    }
-  }}, {});
-module.exports = Dispatch;
+var Dispatch = (function(){"use strict";var PRS$0 = (function(o,t){o["__proto__"]={"a":t};return o["a"]===t})({},{});var DP$0 = Object.defineProperty;var GOPD$0 = Object.getOwnPropertyDescriptor;var MIXIN$0 = function(t,s){for(var p in s){if(s.hasOwnProperty(p)){DP$0(t,p,GOPD$0(s,p));}}return t};var proto$0={};
+	function Dispatch(payload) {
+		this.payload = payload;
+		this.isPending = {};
+		this.isHandled = {};
+	}DP$0(Dispatch,"prototype",{"configurable":false,"enumerable":false,"writable":false});
 
-//# sourceMappingURL=<compileOutput>
+	proto$0.dispatchToTable = function(id, table) {
+		var action = (params = this.payload).action, params = params.params;
+		if (table.has(action)) {
+			this.isPending[id] = true;
+			table.get(action).call(action, params);
+			this.isHandled[id] = true;
+			this.isPending[id] = false;
+		}
+	};
+MIXIN$0(Dispatch.prototype,proto$0);proto$0=void 0;return Dispatch;})();
 
-
+module.exports = Dispatch
 },{}],54:[function(require,module,exports){
-"use strict";
 var Map = require('es6-map');
 var assign = require('object-assign');
+
 function proxy(dest, src, methods) {
-  methods.forEach((function(method) {
-    if (src[method]) {
-      dest[method] = function() {
-        return src[method].apply(src, arguments);
-      };
-    }
-  }));
+	methods.forEach(function(method)  {
+		if (src[method]) {
+			dest[method] = function() {
+				return src[method].apply(src, arguments);
+			}
+		}
+	});
 }
-var DispatchTable = function DispatchTable(handlers, spec) {
-  this.handlers = new Map(handlers);
-  proxy(this, this.handlers, ['has', 'get', 'clear']);
-  assign(this, spec);
-};
-($traceurRuntime.createClass)(DispatchTable, {}, {});
-module.exports = DispatchTable;
 
-//# sourceMappingURL=<compileOutput>
+var DispatchTable = (function(){"use strict";var PRS$0 = (function(o,t){o["__proto__"]={"a":t};return o["a"]===t})({},{});var DP$0 = Object.defineProperty;var GOPD$0 = Object.getOwnPropertyDescriptor;var MIXIN$0 = function(t,s){for(var p in s){if(s.hasOwnProperty(p)){DP$0(t,p,GOPD$0(s,p));}}return t};
+	function DispatchTable(handlers, spec) {
+		this.handlers = new Map(handlers);
+		proxy(this, this.handlers, ['has', 'get', 'clear']);
+		assign(this, spec);
+	}DP$0(DispatchTable,"prototype",{"configurable":false,"enumerable":false,"writable":false});
+;return DispatchTable;})();
 
-
+module.exports = DispatchTable
 },{"es6-map":2,"object-assign":52}],55:[function(require,module,exports){
-"use strict";
 var Map = require('es6-map');
 var invariant = require('./lib/invariant');
 var warning = require('./lib/warning');
+
 var Dispatch = require('./Dispatch');
 var createActions = require('./lib/createActions');
+
 var lastId = 1;
-var IS_DISPATCHING = false;
+var IS_DISPATCHING = false
 var dispatchTables = {};
-var Dispatcher = function Dispatcher() {
-  this.queue = [];
-};
-($traceurRuntime.createClass)(Dispatcher, {
-  register: function(table) {
-    var id = ("id" + ++lastId);
-    dispatchTables[id] = table;
-    return id;
-  },
-  unregister: function(id) {
-    invariant(dispatchTables[id], ("Dispatcher.unregister(...): " + id + " does not map to a registered dispatch table."));
-    dispatchTables[id].clear();
-    delete dispatchTables[id];
-  },
-  isDispatching: function() {
-    return IS_DISPATCHING;
-  },
-  createActions: function(spec) {
-    return createActions(spec, this);
-  },
-  waitFor: function() {
-    for (var ids = [],
-        $__2 = 0; $__2 < arguments.length; $__2++)
-      ids[$__2] = arguments[$__2];
-    var $__0 = this;
-    invariant(IS_DISPATCHING || !this.currentDispatch, 'Dispatcher.waitFor(...): Cannot call waitFor while not currently dispatching.');
-    ids.forEach((function(id) {
-      if ($__0.currentDispatch.isPending[id]) {
-        invariant($__0.currentDispatch.isPending[id], ("Dispatcher.waitFor(...): Circular dependency detected while waiting for " + id));
-        return;
-      }
-      invariant(dispatchTables[id], ("Dispatcher.waitFor(...): " + id + " does not map to a registered dispatch table."));
-      $__0.currentDispatch.dispatchToTable(id, dispatchTables[id]);
-    }));
-  },
-  dispatch: function(action, params) {
-    var $__0 = this;
-    if (this.isDispatching()) {
-      warning(!this.isDispatching(), 'Dispatcher.dispatch(...): Cascading dispatch detected. \n' + ("You have tried to dispatch an action of type '" + action.displayName() + "' while simultaneously dispatching an action of type '" + this.currentDispatch.payload.action.displayName() + "'. ") + 'This action will be queued until the pending payload has finished dispatching. ' + 'Actions should avoid cascading updates wherever possible.');
-      return this.queueDispatch(action, params);
-    }
-    this.startDispatch(action, params, (function(currentDispatch) {
-      IS_DISPATCHING = true;
-      $__0.currentDispatch = currentDispatch;
-      try {
-        for (var id in dispatchTables) {
-          currentDispatch.dispatchToTable(id, dispatchTables[id]);
-        }
-      } finally {
-        IS_DISPATCHING = false;
-        $__0.currentDispatch = null;
-        $__0.flushQueue();
-      }
-    }));
-  },
-  queueDispatch: function(action, params) {
-    if (!this.isDispatching()) {
-      this.dispatch(action, params);
-    }
-    this.queue.push({
-      action: action,
-      params: params
-    });
-  },
-  flushQueue: function() {
-    var queued;
-    while (queued = this.queue.pop())
-      this.dispatch(queued.action, queued.params);
-  },
-  startDispatch: function(action, params, cb) {
-    cb(new Dispatch({
-      action: action,
-      params: params
-    }));
-  }
-}, {});
-module.exports = Dispatcher;
 
-//# sourceMappingURL=<compileOutput>
+var Dispatcher = (function(){"use strict";var PRS$0 = (function(o,t){o["__proto__"]={"a":t};return o["a"]===t})({},{});var DP$0 = Object.defineProperty;var GOPD$0 = Object.getOwnPropertyDescriptor;var MIXIN$0 = function(t,s){for(var p in s){if(s.hasOwnProperty(p)){DP$0(t,p,GOPD$0(s,p));}}return t};var proto$0={};
+	function Dispatcher() {
+		this.queue = [];
+	}DP$0(Dispatcher,"prototype",{"configurable":false,"enumerable":false,"writable":false});
+	
+	proto$0.register = function(table) {
+		var id = ("id" + (++lastId))
+		dispatchTables[id] = table;
+		return id;
+	};
 
+	proto$0.unregister = function(id) {
+		invariant(dispatchTables[id],
+			(("Dispatcher.unregister(...): " + id) + " does not map to a registered dispatch table."));
+		
+		dispatchTables[id].clear();
+		delete dispatchTables[id];
+	};
 
+	proto$0.isDispatching = function() {
+		return IS_DISPATCHING;
+	};
+
+	proto$0.createActions = function(spec) {
+		return createActions(spec, this);
+	};
+
+	proto$0.waitFor = function() {var SLICE$0 = Array.prototype.slice;var ids = SLICE$0.call(arguments, 0);var this$0 = this;
+		invariant(
+			IS_DISPATCHING || !this.currentDispatch,
+			'Dispatcher.waitFor(...): Cannot call waitFor while not currently dispatching.'
+		);
+
+		ids.forEach(function(id)  {
+			if (this$0.currentDispatch.isPending[id]) {
+				invariant(
+					this$0.currentDispatch.isPending[id],
+					("Dispatcher.waitFor(...): Circular dependency detected while waiting for " + id)
+				);
+				return;
+			}
+			invariant(
+				dispatchTables[id],
+				(("Dispatcher.waitFor(...): " + id) + " does not map to a registered dispatch table.")
+			);
+			this$0.currentDispatch.dispatchToTable(id, dispatchTables[id]);
+		});
+	};
+
+	proto$0.dispatch = function(action, params) {var this$0 = this;
+		if (this.isDispatching()) {
+			warning(
+				!this.isDispatching(),
+				'Dispatcher.dispatch(...): Cascading dispatch detected. \n' +
+				(("You have tried to dispatch an action of type '" + (action.displayName())) + ("' while simultaneously dispatching an action of type '" + (this.currentDispatch.payload.action.displayName())) + "'. ") +
+				'This action will be queued until the pending payload has finished dispatching. ' +
+				'Actions should avoid cascading updates wherever possible.'
+			);
+
+			return this.queueDispatch(action, params);
+		}
+
+		this.startDispatch(action, params, function(currentDispatch)  {
+			IS_DISPATCHING = true;
+			this$0.currentDispatch = currentDispatch;
+			try {
+				for (var id in dispatchTables) {
+					currentDispatch.dispatchToTable(id, dispatchTables[id])
+				}
+
+			} finally {
+				IS_DISPATCHING = false;
+				this$0.currentDispatch = null;
+				this$0.flushQueue();
+			}
+		});
+	};
+
+	proto$0.queueDispatch = function(action, params) {
+		if (!this.isDispatching()) {
+			this.dispatch(action, params)
+		}
+		this.queue.push({action: action, params: params})
+	};
+
+	proto$0.flushQueue = function() {
+		var queued;
+		while(queued = this.queue.pop())
+			this.dispatch(queued.action, queued.params);
+	};
+
+	proto$0.startDispatch = function(action, params, cb) {
+		cb(new Dispatch({action: action, params: params}));
+	};
+MIXIN$0(Dispatcher.prototype,proto$0);proto$0=void 0;return Dispatcher;})();
+
+module.exports = Dispatcher
 },{"./Dispatch":53,"./lib/createActions":59,"./lib/invariant":63,"./lib/warning":65,"es6-map":2}],56:[function(require,module,exports){
-"use strict";
-var EventEmitter = require('events').EventEmitter;
+var EventEmitter = (require('events')).EventEmitter;
 var invariant = require('./lib/invariant');
-var $__3 = require('./lib/storeHelpers'),
-    setPending = $__3.setPending,
-    resolve = $__3.resolve;
+var setPending = (resolve = require('./lib/storeHelpers')).setPending, resolve = resolve.resolve;
 var createDispatchTable = require('./lib/createDispatchTable');
+
 var CHANGE_EVENT = "change";
-var BaseStore = function BaseStore() {
-  if (!this.displayName) {
-    this.displayName = "Store";
-  }
-};
-($traceurRuntime.createClass)(BaseStore, {
-  emitChange: function() {
-    this.emit(CHANGE_EVENT);
-  },
-  addChangeListener: function(cb) {
-    this.on(CHANGE_EVENT, cb);
-  },
-  removeChangeListener: function(cb) {
-    this.removeListener(CHANGE_EVENT, cb);
-  },
-  setPending: function() {
-    setPending(this);
-  },
-  resolve: function() {
-    resolve(this);
-  },
-  handlers: function() {
-    for (var handlers = [],
-        $__1 = 0; $__1 < arguments.length; $__1++)
-      handlers[$__1] = arguments[$__1];
-    if (!arguments.length) {
-      invariant(this.dispatchTable, (this.displayName + ".handlers(): No handlers have been declared."));
-      return this.dispatchTable;
-    }
-    this.dispatchTable = createDispatchTable(handlers, this.displayName);
-  }
-}, {}, EventEmitter);
-module.exports = BaseStore;
 
-//# sourceMappingURL=<compileOutput>
+var BaseStore = (function(super$0){"use strict";var PRS$0 = (function(o,t){o["__proto__"]={"a":t};return o["a"]===t})({},{});var DP$0 = Object.defineProperty;var GOPD$0 = Object.getOwnPropertyDescriptor;var MIXIN$0 = function(t,s){for(var p in s){if(s.hasOwnProperty(p)){DP$0(t,p,GOPD$0(s,p));}}return t};var SP$0 = Object.setPrototypeOf||function(o,p){if(PRS$0){o["__proto__"]=p;}else {DP$0(o,"__proto__",{"value":p,"configurable":true,"enumerable":false,"writable":true});}return o};var OC$0 = Object.create;if(!PRS$0)MIXIN$0(BaseStore, super$0);var proto$0={};
+	function BaseStore() {
+		if (!this.displayName) {
+			this.displayName = "Store";
+		}
+	}if(super$0!==null)SP$0(BaseStore,super$0);BaseStore.prototype = OC$0(super$0!==null?super$0.prototype:null,{"constructor":{"value":BaseStore,"configurable":true,"writable":true}});DP$0(BaseStore,"prototype",{"configurable":false,"enumerable":false,"writable":false});
 
+	proto$0.emitChange = function() {
+		this.emit(CHANGE_EVENT);
+	};
 
+	proto$0.addChangeListener = function(cb) {
+		this.on(CHANGE_EVENT, cb);
+	};
+
+	proto$0.removeChangeListener = function(cb) {
+		this.removeListener(CHANGE_EVENT, cb)
+	};
+
+	proto$0.setPending = function() {
+		setPending(this);
+	};
+
+	proto$0.resolve = function() {
+		resolve(this);
+	};
+
+	proto$0.handlers = function() {var SLICE$0 = Array.prototype.slice;var handlers = SLICE$0.call(arguments, 0);
+		if (!arguments.length) {
+			invariant(
+				this.dispatchTable,
+				(("" + (this.displayName)) + ".handlers(): No handlers have been declared.")
+			);
+			return this.dispatchTable;
+		}
+
+		this.dispatchTable = createDispatchTable(handlers, this.displayName);
+	};
+MIXIN$0(BaseStore.prototype,proto$0);proto$0=void 0;return BaseStore;})(EventEmitter);
+
+module.exports = BaseStore
 },{"./lib/createDispatchTable":61,"./lib/invariant":63,"./lib/storeHelpers":64,"events":1}],57:[function(require,module,exports){
-"use strict";
 var createAction = require('./lib/createAction');
-var anyPending = require('./lib/storeHelpers').anyPending;
+var anyPending = (require('./lib/storeHelpers')).anyPending;
+
 var fluent = {
-  Dispatcher: require('./Dispatcher'),
-  createStore: require('./lib/createStore'),
-  handler: require('./lib/createDispatchRecord'),
-  anyPending: anyPending,
-  ALL_ACTIONS: createAction(function() {}, "ALL_ACTIONS")
+	Dispatcher: require('./Dispatcher'),
+	createStore: require('./lib/createStore'),
+	handler: require('./lib/createDispatchRecord'),
+	anyPending: anyPending,
+	ALL_ACTIONS: createAction(function () {}, "ALL_ACTIONS")
 };
+
 module.exports = fluent;
-
-//# sourceMappingURL=<compileOutput>
-
-
 },{"./Dispatcher":55,"./lib/createAction":58,"./lib/createDispatchRecord":60,"./lib/createStore":62,"./lib/storeHelpers":64}],58:[function(require,module,exports){
-"use strict";
 module.exports = function createAction(fn, name, dispatcher) {
-  var functor = function() {
-    fn.apply(functor, arguments);
-  };
-  functor.displayName = function() {
-    return name;
-  };
-  functor.dispatch = function(params) {
-    dispatcher.dispatch(functor, params);
-  };
-  return functor;
-};
+	var functor = function() {
+			fn.apply(functor, arguments);
+	}
 
-//# sourceMappingURL=<compileOutput>
+	functor.displayName = function() {
+		return name;
+	}
 
+	functor.dispatch = function(params) {
+		dispatcher.dispatch(functor, params)
+	}
 
+	return functor;
+}
 },{}],59:[function(require,module,exports){
-"use strict";
 var createAction = require('./createAction');
+
 module.exports = function createActions(actions, dispatcher) {
-  var definition = {};
-  for (var method in actions) {
-    definition[method] = createAction(actions[method], method, dispatcher);
-  }
-  return definition;
-};
+	var definition = {};
+	for (var method in actions) {
+		definition[method] = createAction(actions[method], method, dispatcher);
+	}
 
-//# sourceMappingURL=<compileOutput>
-
-
+	return definition;
+}
 },{"./createAction":58}],60:[function(require,module,exports){
-"use strict";
 var invariant = require('./invariant');
+
 module.exports = function createDispatchRecord(action, handler) {
-  invariant(action, "handler(...): You have tried to create a dispatch handler with a null or undefined Action type - this is usually an error.");
-  return [action, handler];
-};
+	invariant(
+		action, 
+		"handler(...): You have tried to create a dispatch handler with a null or undefined Action type - this is usually an error."
+	);
 
-//# sourceMappingURL=<compileOutput>
-
-
+	return [action, handler];
+}
 },{"./invariant":63}],61:[function(require,module,exports){
-"use strict";
 var invariant = require('./invariant');
 var DispatchTable = require('../DispatchTable');
+
 var TablePostfix = "_DispatchTable";
+
 module.exports = function createDispatchTable(handlers, displayName) {
-  if (!handlers || !handlers.length) {
-    invariant(false, ("createDispatchTable(...): Store " + store.displayName + " has not declared any handlers."));
-  }
-  var spec = {displayName: (displayName ? displayName : "") + TablePostfix};
-  return new DispatchTable(handlers, spec);
-};
+	if (!handlers || !handlers.length) {
+		invariant(
+			false,
+			(("createDispatchTable(...): Store " + (store.displayName)) + " has not declared any handlers.")
+		);
+	}
 
-//# sourceMappingURL=<compileOutput>
+	var spec = {
+		displayName: (displayName ? displayName : "") + TablePostfix
+	}
 
-
+	return new DispatchTable(handlers, spec);
+}
 },{"../DispatchTable":54,"./invariant":63}],62:[function(require,module,exports){
-"use strict";
 var BaseStore = require('../Store');
 var assign = require('object-assign');
+
 module.exports = function createStore(spec) {
-  var Store = function Store() {
-    $traceurRuntime.defaultSuperCall(this, $Store.prototype, arguments);
-  };
-  var $Store = Store;
-  ($traceurRuntime.createClass)(Store, {}, {}, BaseStore);
-  assign(Store.prototype, spec);
-  return new Store();
-};
+	var Store = (function(super$0){"use strict";var PRS$0 = (function(o,t){o["__proto__"]={"a":t};return o["a"]===t})({},{});var DP$0 = Object.defineProperty;var GOPD$0 = Object.getOwnPropertyDescriptor;var MIXIN$0 = function(t,s){for(var p in s){if(s.hasOwnProperty(p)){DP$0(t,p,GOPD$0(s,p));}}return t};var SP$0 = Object.setPrototypeOf||function(o,p){if(PRS$0){o["__proto__"]=p;}else {DP$0(o,"__proto__",{"value":p,"configurable":true,"enumerable":false,"writable":true});}return o};var OC$0 = Object.create;function Store() {super$0.apply(this, arguments)}if(!PRS$0)MIXIN$0(Store, super$0);if(super$0!==null)SP$0(Store,super$0);Store.prototype = OC$0(super$0!==null?super$0.prototype:null,{"constructor":{"value":Store,"configurable":true,"writable":true}});DP$0(Store,"prototype",{"configurable":false,"enumerable":false,"writable":false});
 
-//# sourceMappingURL=<compileOutput>
+	;return Store;})(BaseStore);
 
-
+	assign(Store.prototype, spec);
+	return new Store();
+}
 },{"../Store":56,"object-assign":52}],63:[function(require,module,exports){
+/**
+ * Copyright 2013-2014, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ * @providesModule invariant
+ */
+
 "use strict";
-"use strict";
+
+/**
+ * Use invariant() to assert state which your program assumes to be true.
+ *
+ * Provide sprintf-style format (only %s is supported) and arguments
+ * to provide information about what broke and what you were
+ * expecting.
+ *
+ * The invariant message will be stripped in production, but the invariant
+ * will remain to ensure logic does not differ in production.
+ */
+
 var invariant = function(condition, format, a, b, c, d, e, f) {
   if ("production" !== "production") {
     if (format === undefined) {
       throw new Error('invariant requires an error message argument');
     }
   }
+
   if (!condition) {
     var error;
     if (format === undefined) {
-      error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
+      error = new Error(
+        'Minified exception occurred; use the non-minified dev environment ' +
+        'for the full error message and additional helpful warnings.'
+      );
     } else {
       var args = [a, b, c, d, e, f];
       var argIndex = 0;
-      error = new Error('Invariant Violation: ' + format.replace(/%s/g, function() {
-        return args[argIndex++];
-      }));
+      error = new Error(
+        'Invariant Violation: ' +
+        format.replace(/%s/g, function() { return args[argIndex++]; })
+      );
     }
-    error.framesToPop = 1;
+
+    error.framesToPop = 1; // we don't care about invariant's own frame
     throw error;
   }
 };
+
 module.exports = invariant;
 
-//# sourceMappingURL=<compileOutput>
-
-
 },{}],64:[function(require,module,exports){
-"use strict";
 var PENDING_TOKEN = "PENDING_TOKEN";
+
 function any(xs, pred) {
-  var idx = -1,
-      length = xs.length;
-  while (++idx < length) {
-    if (pred(xs[idx], idx, xs)) {
-      return true;
-    }
-  }
-  return false;
+	var idx = -1,
+		length = xs.length;
+
+	while (++idx < length) {
+		if (pred(xs[idx], idx, xs)) {
+			return true;
+		}
+	}
+
+	return false;
 }
+
 module.exports = {
-  setPending: function(store) {
-    store.pendingToken = PENDING_TOKEN;
-    store.emitChange();
-  },
-  resolve: function(store) {
-    store.pendingToken = null;
-    store.emitChange();
-  },
-  anyPending: function() {
-    for (var stores = [],
-        $__0 = 0; $__0 < arguments.length; $__0++)
-      stores[$__0] = arguments[$__0];
-    return any(stores, (function(store) {
-      return store.pendingToken == PENDING_TOKEN;
-    }));
-  }
-};
+	setPending: function(store) {
+		store.pendingToken = PENDING_TOKEN;
+		store.emitChange();
+	},
 
-//# sourceMappingURL=<compileOutput>
+	resolve: function(store) {
+		store.pendingToken = null;
+		store.emitChange();
+	},
 
-
+	anyPending: function() {var SLICE$0 = Array.prototype.slice;var stores = SLICE$0.call(arguments, 0);
+		return any(stores, function(store)  {
+			return store.pendingToken == PENDING_TOKEN;
+		});
+	}
+}
 },{}],65:[function(require,module,exports){
+/**
+ * Copyright 2014, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ * @providesModule warning
+ */
+
 "use strict";
-"use strict";
+
 function emptyFunction() {}
+
+/**
+ * Similar to invariant but only logs a warning if the condition is not met.
+ * This can be used to log issues in development environments in critical
+ * paths. Removing the logging code for production environments will keep the
+ * same logic and follow the same code paths.
+ */
+
 var warning = emptyFunction;
+
 if ("production" !== "production") {
-  warning = function(condition, format) {
-    var args = Array.prototype.slice.call(arguments, 2);
+  warning = function(condition, format ) {var args=Array.prototype.slice.call(arguments,2);
     if (format === undefined) {
-      throw new Error('`warning(condition, format, ...args)` requires a warning ' + 'message argument');
+      throw new Error(
+        '`warning(condition, format, ...args)` requires a warning ' +
+        'message argument'
+      );
     }
+
     if (!condition) {
       var argIndex = 0;
-      console.warn('Warning: ' + format.replace(/%s/g, function() {
-        return args[argIndex++];
-      }));
+      console.warn('Warning: ' + format.replace(/%s/g, function()  {return args[argIndex++];}));
     }
   };
 }
+
 module.exports = warning;
-
-//# sourceMappingURL=<compileOutput>
-
 
 },{}]},{},[57])(57)
 });

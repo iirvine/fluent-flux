@@ -49,10 +49,6 @@ var UserStore = fluent.createStore({
 });
 
 UserStore.handlers(
-  handler(ALL_ACTIONS, (action, params) => {
-    console.log("This special handler gets called for every event dispatched!");
-  }),
-
   handler(buttonClicked, (params) => {
     console.log("Fetching user...")
     UserStore.setPending();

@@ -6,7 +6,7 @@ Fluent is a still-experimental implementation of Facebook's unidirectional [flux
 
 ##Example
 
-Here's a portion of a trivial app implemented with fluent:
+Here's a trivial app implemented with fluent - see the examples directory for a full working sample:
 
 *users/UserActions.js*
 ```js
@@ -34,7 +34,7 @@ module.exports = UserActions
 *users/UserStore.js*
 ```js
 var fluent = require('fluent-flux');
-var { handler, ALL_ACTIONS } = fluent;
+var { handler } = fluent;
 
 var { buttonClicked, receiveUser } = require('./UserActions');
 var Dispatcher = require('../common/dispatcher');
@@ -146,4 +146,5 @@ Feedback would be much appreciated! Feel free to file an issue or hit me up on t
 - [ ] Documentation
 - [ ] Tests 
 - [ ] Mixins
+- [ ] More examples
 - [ ] Publish to npm

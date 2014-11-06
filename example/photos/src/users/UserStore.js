@@ -1,34 +1,33 @@
-var fluent = require('fluent-flux');
-var { handler, ALL_ACTIONS } = fluent;
-
-var { buttonClicked, receiveUser } = require('./UserActions');
 var Dispatcher = require('../common/dispatcher');
+var { changeHandler } = require('fluent-flux');
+var { buttonClicked, receiveUser } = require('./UserActions');
 
 var currentUser = null;
+var dispatchToken = null;
 
-var UserStore = fluent.createStore({
+var UserStore = Dispatcher.createStore({
 	displayName: "UserStore",
 	get() {
 		return currentUser;
 	},
+
+	getDispatchToken() {
+		return dispatchToken;
+	},
+
+	handlers: [
+		changeHandler(buttonClicked, (params) => {
+			console.log("Fetching user...")
+			UserStore.setPending();
+		}),
+		
+		changeHandler(receiveUser, (params) => {
+			currentUser = {params};
+			UserStore.resolve();
+		})
+	]
 });
 
-UserStore.handlers(
-	handler(ALL_ACTIONS, (action, params) => {
-		console.log("This special handler gets called for every event dispatched!");
-	}),
-
-	handler(buttonClicked, (params) => {
-		console.log("Fetching user...")
-		UserStore.setPending();
-	}),
-	
-	handler(receiveUser, (params) => {
-		currentUser = {params};
-		UserStore.resolve();
-	})
-);
-
-UserStore.dispatchToken = Dispatcher.register(UserStore.handlers());
+dispatchToken = Dispatcher.register(UserStore);
 
 module.exports = UserStore

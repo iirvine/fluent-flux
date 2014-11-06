@@ -16,7 +16,7 @@ module.exports = {
   },
   resolve: {
     alias: {
-        'fluent-flux': path.join(__dirname, "dist", "fluent-flux")
+        'fluent-flux': path.join(__dirname, "src", "index")
     },
     extensions: ["", ".webpack.js", ".web.js", ".js", ".jsx"]
   },

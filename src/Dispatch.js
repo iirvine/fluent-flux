@@ -5,11 +5,11 @@ class Dispatch {
 		this.isHandled = {};
 	}
 
-	dispatchToTable(id, table) {
+	dispatchToTable(id, {ctx, table}) {
 		var {action, params} = this.payload;
 		if (table.has(action)) {
 			this.isPending[id] = true;
-			table.get(action).call(action, params);
+			table.get(action).call(ctx, params);
 			this.isHandled[id] = true;
 			this.isPending[id] = false;
 		}

@@ -5,9 +5,12 @@ var { handler } = fluent;
 var { receiveAll } = require('../messages/MessageServerActions');
 
 var currentID = null;
+var dispatchToken = null;
 var threads = {};
 
 var ThreadStore = fluent.createStore({
+	displayName: "ThreadStore",
+	
 	init(rawMessages) {
 		rawMessages.forEach((message) => {
 			var threadID = message.threadID;
@@ -49,16 +52,20 @@ var ThreadStore = fluent.createStore({
 	    return 0;
 	  });
 	  return orderedThreads;
-	}
+	},
+
+	getDispatchToken() {
+		return dispatchToken
+	},
+
+	handlers: [
+		handler(receiveAll, (params) => {
+			ThreadStore.init(params.rawMessages);
+			ThreadStore.emitChange();
+		})
+	]
 });
 
-ThreadStore.handlers(
-	handler(receiveAll, (params) => {
-		ThreadStore.init(params.rawMessages);
-		ThreadStore.emitChange();
-	})
-);
-
-ThreadStore.dispatchToken = Dispatcher.register(ThreadStore.handlers());
+dispatchToken = Dispatcher.register(ThreadStore);
 
 module.exports = ThreadStore;

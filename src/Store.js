@@ -1,7 +1,8 @@
-var { EventEmitter } = require('events');
+var warn = require('./lib/warning');
 var invariant = require('./lib/invariant');
-var { setPending, resolve } = require('./lib/storeHelpers');
 var createDispatchTable = require('./lib/createDispatchTable');
+var { EventEmitter } = require('events');
+var { setPending, resolve } = require('./lib/storeHelpers');
 
 const CHANGE_EVENT = "change";
 
@@ -10,6 +11,14 @@ class BaseStore extends EventEmitter {
 		if (!this.displayName) {
 			this.displayName = "Store";
 		}
+
+		invariant(
+			this.handlers,
+			`Store ${this.displayName} has not declared any handlers.`
+		);
+
+		this.dispatchTable = createDispatchTable(this.handlers, this.displayName);
+		delete this.handlers;
 	}
 
 	emitChange() {
@@ -32,17 +41,17 @@ class BaseStore extends EventEmitter {
 		resolve(this);
 	}
 
-	handlers(...handlers) {
-		if (!arguments.length) {
-			invariant(
-				this.dispatchTable,
-				`${this.displayName}.handlers(): No handlers have been declared.`
-			);
-			return this.dispatchTable;
-		}
+	// handlers(...handlers) {
+	// 	if (!arguments.length) {
+	// 		invariant(
+	// 			this.dispatchTable,
+	// 			`${this.displayName}.handlers(): No handlers have been declared.`
+	// 		);
+	// 		return this.dispatchTable;
+	// 	}
 
-		this.dispatchTable = createDispatchTable(handlers, this.displayName);
-	}
+	// 	this.dispatchTable = createDispatchTable(handlers, this.displayName);
+	// }
 }
 
 module.exports = BaseStore

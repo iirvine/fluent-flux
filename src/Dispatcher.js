@@ -14,9 +14,12 @@ class Dispatcher {
 		this.queue = [];
 	}
 	
-	register(table) {
+	register(store) {
 		var id = `id${++lastId}`
-		dispatchTables[id] = table;
+		dispatchTables[id] = {
+			ctx: store,
+			table: store.dispatchTable
+		}
 		return id;
 	}
 

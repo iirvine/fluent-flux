@@ -6,6 +6,7 @@ var { createMessage } = require('./MessageActions');
 var { receiveAll } = require('./MessageServerActions');
 var { handler } = fluent;
 
+var dispatchToken = null;
 var messages = {};
 
 function addMessages(rawMessages) {
@@ -57,24 +58,26 @@ var MessageStore = fluent.createStore({
 			text: text,
 			isRead: true
 		};
-	}
+	},
+
+	getDispatchToken() {
+		return dispatchToken;
+	},
+
+	handlers: [
+		handler(createMessage, (params) => {
+			var message = MessageStore.getCreatedMessageData(params.text);
+			messages[message.id] = message;
+		}),
+
+		handler(receiveAll, (params) => {
+			addMessages(params.rawMessages);
+			Dispatcher.waitFor(ThreadStore.getDispatchToken());
+			markAllInThreadRead(ThreadStore.getCurrentID());
+		})
+	]
 });
 
-MessageStore.handlers(
-	handler(createMessage, (params) => {
-		var message = MessageStore.getCreatedMessageData(params.text);
-		messages[message.id] = message;
-		MessageStore.emitChange();
-	}),
-
-	handler(receiveAll, (params) => {
-		addMessages(params.rawMessages);
-		Dispatcher.waitFor(ThreadStore.dispatchToken);
-		markAllInThreadRead(ThreadStore.getCurrentID());
-		MessageStore.emitChange()
-	})
-);
-
-MessageStore.dispatchToken = Dispatcher.register(MessageStore.handlers());
+dispatchToken = Dispatcher.register(MessageStore);
 
 module.exports = MessageStore;

@@ -1,31 +1,17 @@
 var createAction = require('./lib/createAction');
 var createDispatchRecord = require('./lib/createDispatchRecord');
+var { beforeHandler, changeHandler } = require('./lib/handlers');
 var { anyPending } = require('./lib/storeHelpers');
 
-function after(handler, fn) {
-	return function() {
-		handler.apply(this, arguments);
-		fn.apply(this, arguments);
-	}
-}
-
-function emitsChange(handler) {
-	return after(handler, function() {
-		this.emitChange();
-	});
-}
+var ALL_ACTIONS = createAction(function () {}, "ALL_ACTIONS");
 
 var fluent = {
 	Dispatcher: require('./Dispatcher'),
 	handler: createDispatchRecord,
-	changeHandler: (action, handler) => {
-		if (!handler) {
-			handler = () => {};
-		}
-		return createDispatchRecord(action, emitsChange(handler));
-	},
-	anyPending: anyPending,
-	ALL_ACTIONS: createAction(function () {}, "ALL_ACTIONS")
+	changeHandler,
+	beforeHandler,
+	anyPending,
+	ALL_ACTIONS
 };
 
 module.exports = fluent;

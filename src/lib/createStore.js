@@ -1,7 +1,7 @@
 var BaseStore = require('../Store');
 var assign = require('object-assign');
 var invariant = require('./invariant');
-var createDispatchRecord = require('./createDispatchRecord');
+var { beforeHandler } = require('./handlers');
 
 function before(handler, fn) {
 	return function() {
@@ -26,10 +26,9 @@ module.exports = function createStore(spec) {
 	);
 
 	if (spec.beforeHandler) {
-		spec.handlers = spec.handlers.map((record) => {
-			var [action, handler] = record;
-			return createDispatchRecord(action, before(handler, spec.beforeHandler))
-		})
+		spec.handlers = spec.handlers.map(
+			beforeHandler.fromDispatchRecord(spec.beforeHandler)
+		);
 	}
 
 	assign(Store.prototype, spec);

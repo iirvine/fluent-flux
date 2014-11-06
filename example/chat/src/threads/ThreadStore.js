@@ -1,14 +1,13 @@
-var fluent = require('fluent-flux');
 var Dispatcher = require('../common/dispatcher');
 var ChatMessageUtils = require('../utils/ChatMessageUtils');
-var { handler } = fluent;
+var { changeHandler } = require('fluent-flux');
 var { receiveAll } = require('../messages/MessageServerActions');
 
 var currentID = null;
 var dispatchToken = null;
 var threads = {};
 
-var ThreadStore = fluent.createStore({
+var ThreadStore = Dispatcher.createStore({
 	displayName: "ThreadStore",
 	
 	init(rawMessages) {
@@ -59,7 +58,7 @@ var ThreadStore = fluent.createStore({
 	},
 
 	handlers: [
-		handler(receiveAll, (params) => {
+		changeHandler(receiveAll, (params) => {
 			ThreadStore.init(params.rawMessages);
 			ThreadStore.emitChange();
 		})

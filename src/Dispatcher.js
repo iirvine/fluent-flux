@@ -4,6 +4,7 @@ var warning = require('./lib/warning');
 
 var Dispatch = require('./Dispatch');
 var createActions = require('./lib/createActions');
+var createStore = require('./lib/createStore');
 
 var lastId = 1;
 var IS_DISPATCHING = false
@@ -20,6 +21,7 @@ class Dispatcher {
 			ctx: store,
 			table: store.dispatchTable
 		}
+		delete store.dispatchTable;
 		return id;
 	}
 
@@ -37,6 +39,10 @@ class Dispatcher {
 
 	createActions(spec) {
 		return createActions(spec, this);
+	}
+
+	createStore(spec) {
+		return createStore(spec);
 	}
 
 	waitFor(...ids) {

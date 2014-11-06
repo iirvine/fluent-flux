@@ -1572,11 +1572,11 @@ var Dispatch = (function(){"use strict";var PRS$0 = (function(o,t){o["__proto__"
 		this.isHandled = {};
 	}DP$0(Dispatch,"prototype",{"configurable":false,"enumerable":false,"writable":false});
 
-	proto$0.dispatchToTable = function(id, table) {
+	proto$0.dispatchToTable = function(id, table) {var ctx = table.ctx, table = table.table;
 		var action = (params = this.payload).action, params = params.params;
 		if (table.has(action)) {
 			this.isPending[id] = true;
-			table.get(action).call(action, params);
+			table.get(action).call(ctx, params);
 			this.isHandled[id] = true;
 			this.isPending[id] = false;
 		}
@@ -1614,6 +1614,7 @@ var warning = require('./lib/warning');
 
 var Dispatch = require('./Dispatch');
 var createActions = require('./lib/createActions');
+var createStore = require('./lib/createStore');
 
 var lastId = 1;
 var IS_DISPATCHING = false
@@ -1624,9 +1625,13 @@ var Dispatcher = (function(){"use strict";var PRS$0 = (function(o,t){o["__proto_
 		this.queue = [];
 	}DP$0(Dispatcher,"prototype",{"configurable":false,"enumerable":false,"writable":false});
 	
-	proto$0.register = function(table) {
+	proto$0.register = function(store) {
 		var id = ("id" + (++lastId))
-		dispatchTables[id] = table;
+		dispatchTables[id] = {
+			ctx: store,
+			table: store.dispatchTable
+		}
+		delete store.dispatchTable;
 		return id;
 	};
 
@@ -1644,6 +1649,10 @@ var Dispatcher = (function(){"use strict";var PRS$0 = (function(o,t){o["__proto_
 
 	proto$0.createActions = function(spec) {
 		return createActions(spec, this);
+	};
+
+	proto$0.createStore = function(spec) {
+		return createStore(spec);
 	};
 
 	proto$0.waitFor = function() {var SLICE$0 = Array.prototype.slice;var ids = SLICE$0.call(arguments, 0);var this$0 = this;
@@ -1716,11 +1725,12 @@ var Dispatcher = (function(){"use strict";var PRS$0 = (function(o,t){o["__proto_
 MIXIN$0(Dispatcher.prototype,proto$0);proto$0=void 0;return Dispatcher;})();
 
 module.exports = Dispatcher
-},{"./Dispatch":53,"./lib/createActions":59,"./lib/invariant":63,"./lib/warning":65,"es6-map":2}],56:[function(require,module,exports){
-var EventEmitter = (require('events')).EventEmitter;
+},{"./Dispatch":53,"./lib/createActions":59,"./lib/createStore":62,"./lib/invariant":63,"./lib/warning":65,"es6-map":2}],56:[function(require,module,exports){
+var warn = require('./lib/warning');
 var invariant = require('./lib/invariant');
-var setPending = (resolve = require('./lib/storeHelpers')).setPending, resolve = resolve.resolve;
 var createDispatchTable = require('./lib/createDispatchTable');
+var EventEmitter = (require('events')).EventEmitter;
+var setPending = (resolve = require('./lib/storeHelpers')).setPending, resolve = resolve.resolve;
 
 var CHANGE_EVENT = "change";
 
@@ -1729,6 +1739,14 @@ var BaseStore = (function(super$0){"use strict";var PRS$0 = (function(o,t){o["__
 		if (!this.displayName) {
 			this.displayName = "Store";
 		}
+
+		invariant(
+			this.handlers,
+			(("Store " + (this.displayName)) + " has not declared any handlers.")
+		);
+
+		this.dispatchTable = createDispatchTable(this.handlers, this.displayName);
+		delete this.handlers;
 	}if(super$0!==null)SP$0(BaseStore,super$0);BaseStore.prototype = OC$0(super$0!==null?super$0.prototype:null,{"constructor":{"value":BaseStore,"configurable":true,"writable":true}});DP$0(BaseStore,"prototype",{"configurable":false,"enumerable":false,"writable":false});
 
 	proto$0.emitChange = function() {
@@ -1751,34 +1769,50 @@ var BaseStore = (function(super$0){"use strict";var PRS$0 = (function(o,t){o["__
 		resolve(this);
 	};
 
-	proto$0.handlers = function() {var SLICE$0 = Array.prototype.slice;var handlers = SLICE$0.call(arguments, 0);
-		if (!arguments.length) {
-			invariant(
-				this.dispatchTable,
-				(("" + (this.displayName)) + ".handlers(): No handlers have been declared.")
-			);
-			return this.dispatchTable;
-		}
+	// handlers(...handlers) {
+	// 	if (!arguments.length) {
+	// 		invariant(
+	// 			this.dispatchTable,
+	// 			`${this.displayName}.handlers(): No handlers have been declared.`
+	// 		);
+	// 		return this.dispatchTable;
+	// 	}
 
-		this.dispatchTable = createDispatchTable(handlers, this.displayName);
-	};
+	// 	this.dispatchTable = createDispatchTable(handlers, this.displayName);
+	// }
 MIXIN$0(BaseStore.prototype,proto$0);proto$0=void 0;return BaseStore;})(EventEmitter);
 
 module.exports = BaseStore
-},{"./lib/createDispatchTable":61,"./lib/invariant":63,"./lib/storeHelpers":64,"events":1}],57:[function(require,module,exports){
+},{"./lib/createDispatchTable":61,"./lib/invariant":63,"./lib/storeHelpers":64,"./lib/warning":65,"events":1}],57:[function(require,module,exports){
 var createAction = require('./lib/createAction');
+var createDispatchRecord = require('./lib/createDispatchRecord');
 var anyPending = (require('./lib/storeHelpers')).anyPending;
+
+function after(handler, fn) {
+	return function() {
+		handler.apply(this, arguments);
+		fn.apply(this, arguments);
+	}
+}
+
+function emitsChange(handler) {
+	return after(handler, function() {
+		this.emitChange();
+	});
+}
 
 var fluent = {
 	Dispatcher: require('./Dispatcher'),
-	createStore: require('./lib/createStore'),
-	handler: require('./lib/createDispatchRecord'),
+	handler: createDispatchRecord,
+	changeHandler: function(action, handler)  {
+		return createDispatchRecord(action, emitsChange(handler));
+	},
 	anyPending: anyPending,
 	ALL_ACTIONS: createAction(function () {}, "ALL_ACTIONS")
 };
 
 module.exports = fluent;
-},{"./Dispatcher":55,"./lib/createAction":58,"./lib/createDispatchRecord":60,"./lib/createStore":62,"./lib/storeHelpers":64}],58:[function(require,module,exports){
+},{"./Dispatcher":55,"./lib/createAction":58,"./lib/createDispatchRecord":60,"./lib/storeHelpers":64}],58:[function(require,module,exports){
 module.exports = function createAction(fn, name, dispatcher) {
 	var functor = function() {
 			fn.apply(functor, arguments);
@@ -1922,12 +1956,10 @@ function any(xs, pred) {
 module.exports = {
 	setPending: function(store) {
 		store.pendingToken = PENDING_TOKEN;
-		store.emitChange();
 	},
 
 	resolve: function(store) {
 		store.pendingToken = null;
-		store.emitChange();
 	},
 
 	anyPending: function() {var SLICE$0 = Array.prototype.slice;var stores = SLICE$0.call(arguments, 0);

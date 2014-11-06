@@ -19,6 +19,9 @@ var fluent = {
 	Dispatcher: require('./Dispatcher'),
 	handler: createDispatchRecord,
 	changeHandler: (action, handler) => {
+		if (!handler) {
+			handler = () => {};
+		}
 		return createDispatchRecord(action, emitsChange(handler));
 	},
 	anyPending: anyPending,

@@ -36,6 +36,14 @@ var ThreadStore = Dispatcher.createStore({
 		return currentID;
 	},
 
+	getAll() {
+		return threads;
+	},
+
+	getCurrent() {
+		return this.get(this.getCurrentID());
+	},
+
 	getAllChrono() {
 		var orderedThreads = [];
 	  for (var id in threads) {
@@ -60,7 +68,6 @@ var ThreadStore = Dispatcher.createStore({
 	handlers: [
 		changeHandler(receiveAll, (params) => {
 			ThreadStore.init(params.rawMessages);
-			ThreadStore.emitChange();
 		})
 	]
 });

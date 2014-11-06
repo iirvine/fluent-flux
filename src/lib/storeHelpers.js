@@ -16,12 +16,10 @@ function any(xs, pred) {
 module.exports = {
 	setPending(store) {
 		store.pendingToken = PENDING_TOKEN;
-		store.emitChange();
 	},
 
 	resolve(store) {
 		store.pendingToken = null;
-		store.emitChange();
 	},
 
 	anyPending(...stores) {

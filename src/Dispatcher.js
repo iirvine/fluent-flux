@@ -1,10 +1,8 @@
-var Map = require('es6-map');
-var invariant = require('./lib/invariant');
-var warning = require('./lib/warning');
-
 var Dispatch = require('./Dispatch');
 var createActions = require('./lib/createActions');
 var createStore = require('./lib/createStore');
+var invariant = require('./lib/invariant');
+var warning = require('./lib/warning');
 
 var lastId = 1;
 var IS_DISPATCHING = false
@@ -52,17 +50,21 @@ class Dispatcher {
 		);
 
 		ids.forEach((id) => {
-			if (this.currentDispatch.isPending[id]) {
-				invariant(
-					this.currentDispatch.isPending[id],
-					`Dispatcher.waitFor(...): Circular dependency detected while waiting for ${id}`
-				);
-				return;
-			}
+			invariant(
+				!this.currentDispatch.isPending[id],
+				`Dispatcher.waitFor(...): Circular dependency detected while waiting for ${id}`
+			);
+
 			invariant(
 				dispatchTables[id],
 				`Dispatcher.waitFor(...): ${id} does not map to a registered dispatch table.`
 			);
+
+			if (this.currentDispatch.isHandled[id]) {
+				// we've already handled this dispatch during the current round - move on.
+				return;
+			}
+
 			this.currentDispatch.dispatchToTable(id, dispatchTables[id]);
 		});
 	}

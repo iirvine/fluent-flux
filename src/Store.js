@@ -12,11 +12,6 @@ class BaseStore extends EventEmitter {
 			this.displayName = "Store";
 		}
 
-		invariant(
-			this.handlers,
-			`Store ${this.displayName} has not declared any handlers.`
-		);
-
 		this.dispatchTable = createDispatchTable(this.handlers, this.displayName);
 		delete this.handlers;
 	}
@@ -40,18 +35,6 @@ class BaseStore extends EventEmitter {
 	resolve() {
 		resolve(this);
 	}
-
-	// handlers(...handlers) {
-	// 	if (!arguments.length) {
-	// 		invariant(
-	// 			this.dispatchTable,
-	// 			`${this.displayName}.handlers(): No handlers have been declared.`
-	// 		);
-	// 		return this.dispatchTable;
-	// 	}
-
-	// 	this.dispatchTable = createDispatchTable(handlers, this.displayName);
-	// }
 }
 
 module.exports = BaseStore

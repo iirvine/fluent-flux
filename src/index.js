@@ -6,7 +6,7 @@ var { anyPending } = require('./lib/storeHelpers');
 var ALL_ACTIONS = createAction(function () {}, "ALL_ACTIONS");
 
 var fluent = {
-	Dispatcher: require('./Dispatcher'),
+	Dispatcher: require('./FluentDispatcher'),
 	handler: createDispatchRecord,
 	changeHandler,
 	anyPending,

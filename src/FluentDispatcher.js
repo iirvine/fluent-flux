@@ -4,22 +4,8 @@ var FluentDispatchCycle = require('./FluentDispatchCycle');
 var createActions = require('./lib/createActions');
 var createStore = require('./lib/createStore');
 
-var SomeOtherMixin = {
-	willDispatch(action, params, dispatch) {
-		console.log('second mixin');
-		dispatch();
-	}
-}
-
-var AnotherMixin = {
-	willDispatch(action, params, dispatch) {
-		console.log('third mixin');
-		dispatch();
-	}
-}
-
 var dispatcher = dispatched.createDispatcher({
-	mixins: [QueuedDispatcher, SomeOtherMixin, AnotherMixin],
+	mixins: [QueuedDispatcher],
 
 	register(store) {
 		return this.registry.register({ctx: store, table: store.dispatchTable});
@@ -28,11 +14,6 @@ var dispatcher = dispatched.createDispatcher({
 	unregister(id) {
 		this.registry.get(id).clear();
 		return this.registry.unregister(id);
-	},
-
-	willDispatch(action, params, dispatch) {
-		console.log('final: dispatcher');
-		dispatch();
 	},
 
 	startDispatch(action, params, start) {
@@ -47,7 +28,5 @@ var dispatcher = dispatched.createDispatcher({
 		return createStore(spec);
 	}
 });
-
-dispatcher.dispatch(function(){}, {init: true});
 
 module.exports = dispatcher

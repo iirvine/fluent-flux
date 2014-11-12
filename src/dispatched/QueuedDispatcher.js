@@ -7,7 +7,6 @@ var QueuedDispatcher = {
 	},
 	
 	willDispatch(action, params, dispatch) {
-		console.log('queued dispatch mixin');
 		if (this.isDispatching()) {
 			warning(
 				!this.isDispatching(),

@@ -3,13 +3,6 @@ var assign = require('object-assign');
 var invariant = require('./invariant');
 var { beforeHandler } = require('./handlers');
 
-function before(handler, fn) {
-	return function() {
-		fn.apply(this, arguments);
-		handler.apply(this, arguments);
-	}
-}
-
 module.exports = function createStore(spec) {
 	class Store extends BaseStore {
 

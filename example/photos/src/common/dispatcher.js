@@ -1,3 +1,3 @@
-var { Dispatcher } = require('fluent-flux');
+var { FluentDispatcher } = require('fluent-flux');
 
-module.exports = new Dispatcher();
+module.exports = FluentDispatcher;

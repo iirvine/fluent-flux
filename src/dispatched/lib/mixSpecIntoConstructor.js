@@ -9,10 +9,12 @@ function chain(first, second) {
 }
 
 /*
-Creates a "continuation" chained function from function args first and second - 
-eg, a chain of functions that each call the next function in the chain.
+Creates a "continuation" chained function from function args first and second - eg, a chain 
+of functions that are each passed the next function in the chain as their final parameter. 
+Continuation functions can call next() to continue the chain or return to exit early.
+
 Continuation functions are expected to follow the NodeJS callback interface, eg:
-		function myFunction(...someArgs, next) { }
+		function myFunction(...someArgs, nextFunction) { }
 */
 function makeContinuation(first, second) {
 	return function(...args) {
@@ -22,7 +24,7 @@ function makeContinuation(first, second) {
 		first.apply(this, params.concat(function() {
 			second.apply(self, params.concat(args[args.length - 1]));
 		}));
-	}
+	};
 }
 
 function validateMethodOverride(proto, name, policy, Type) {
@@ -45,37 +47,44 @@ function validateMethodOverride(proto, name, policy, Type) {
 	}
 }
 
-module.exports = function mixSpecIntoConstructor(spec, Constructor, Type, policy) {
-	var proto = Constructor.prototype;
-
-	if (spec.hasOwnProperty('mixins')) {
-		spec.mixins.forEach((mixin) => mixSpecIntoConstructor(mixin, Constructor, Type, policy));
-	}
-
-	for (var name in spec) {
-		if (!spec.hasOwnProperty(name)) {
+function mixInto(source, dest, Type, policy) {
+	for (var name in source) {
+		if (!source.hasOwnProperty(name)) {
 			continue;
 		}
 
-		if (name === 'mixins') {
-			continue;
-		}
+		var property = source[name];
+		validateMethodOverride(dest, name, policy, Type);
 
-		var property = spec[name];
-		validateMethodOverride(proto, name, policy, Type);
-
-		var isAlreadyDefined = proto.hasOwnProperty(name);
-		if (isAlreadyDefined) {
+		if (dest.hasOwnProperty(name)) {
 			var specPolicy = policy.get(name);
 			if (specPolicy === SpecRules.DEFINE_MANY) {
-				proto[name] = chain(proto[name], property);
+				dest[name] = chain(dest[name], property);
 			}
 
 			if (specPolicy === SpecRules.CONTINUATION) {
-				proto[name] = makeContinuation(proto[name], property);
+				dest[name] = makeContinuation(dest[name], property);
 			}
 		} else {
-			proto[name] = property;
+			dest[name] = property;
 		}
 	}
 }
+
+module.exports = function mixSpecIntoConstructor(SpecType, Constructor, Type, policy) {
+	var proto = Constructor.prototype;
+
+	// Assume plain object spec
+	var specProto = SpecType;
+
+	if (SpecType.prototype && Object.getPrototypeOf(SpecType) !== Object.getPrototypeOf({})) {
+		// Class spec
+		specProto = SpecType.prototype;
+	}
+
+	if (SpecType.hasOwnProperty('mixins')) {
+		SpecType.mixins.forEach((mixin) => mixInto(mixin, proto, Type, policy));
+	}
+
+	mixInto(specProto, proto, Type, policy);
+};

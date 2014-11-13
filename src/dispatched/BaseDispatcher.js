@@ -1,5 +1,5 @@
 var invariant = require('./lib/invariant');
-var DefaultDispatchCycle = require('./DefaultDispatchCycle');
+var BaseDispatchCycle = require('./BaseDispatchCycle');
 
 var IS_DISPATCHING = false;
 
@@ -59,8 +59,8 @@ class BaseDispatcher {
 					}
 
 				} finally {
-					this.endDispatch(this.currentDispatch);
 					IS_DISPATCHING = false;
+					this.endDispatch(this.currentDispatch);
 					this.currentDispatch = null;
 				}
 			});
@@ -68,8 +68,8 @@ class BaseDispatcher {
 	}
 
 	startDispatch(action, params, start) {
-		start(new DefaultDispatchCycle({action, params}));
+		start(new BaseDispatchCycle());
 	}
 }
 
-module.exports = BaseDispatcher
+module.exports = BaseDispatcher;

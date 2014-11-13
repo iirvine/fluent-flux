@@ -3,7 +3,7 @@ var warning = require('./lib/warning');
 
 var QueuedDispatcher = {
 	construct() {
-		this.queue = [];
+		this.__dispatchQueue__ = [];
 	},
 	
 	willDispatch(action, params, dispatch) {
@@ -11,7 +11,7 @@ var QueuedDispatcher = {
 			warning(
 				!this.isDispatching(),
 				'Dispatcher.dispatch(...): Cascading dispatch detected. \n' +
-				`You have tried to dispatch an action of type '${action.displayName()}' while simultaneously dispatching an action of type '${this.currentDispatch.payload.action.displayName()}'. ` +
+				`You have tried to dispatch an action of type '${action.displayName()}' while simultaneously dispatching an action of type '${this.currentDispatch.action.displayName()}'. ` +
 				'This action will be queued until the pending payload has finished dispatching. ' +
 				'Actions should avoid cascading updates wherever possible.'
 			);
@@ -25,12 +25,12 @@ var QueuedDispatcher = {
 		if (!this.isDispatching()) {
 			this.dispatch(action, params)
 		}
-		this.queue.push({action, params})
+		this.__dispatchQueue__.push({action, params})
 	},
 	
 	flushQueue() {
 		var queued;
-		while(queued = this.queue.pop())
+		while(queued = this.__dispatchQueue__.pop())
 			this.dispatch(queued.action, queued.params);
 	},
 	

@@ -1,4 +1,4 @@
-class DefaultDispatchCycle {
+class BaseDispatchCycle {
 	constructor() {
 		this._isPending = {};
 		this._isHandled = {};
@@ -29,12 +29,12 @@ class DefaultDispatchCycle {
 	}
 
 	setPending(id, bool) {
-		return this._isPending[id] = bool;
+		this._isPending[id] = bool;
 	}
 
 	setHandled(id, bool) {
-		return this._isHandled[id] = bool;
+		this._isHandled[id] = bool;
 	}
 }
 
-module.exports = DefaultDispatchCycle;
+module.exports = BaseDispatchCycle;

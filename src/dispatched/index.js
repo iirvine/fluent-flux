@@ -1,4 +1,9 @@
+var Dispatcher = require('./defineDispatcher');
+var DispatchCycle = require('./defineDispatchCycle');
+
 module.exports = {
-	createDispatcher: require('./createDispatcher'),
-	createDispatchCycle: require('./createDispatchCycle')
-}
+	define: {
+		Dispatcher,
+		DispatchCycle
+	}
+};

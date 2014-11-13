@@ -1,6 +1,6 @@
-var DispatchCycle = require('./dispatched/DefaultDispatchCycle');
+var { define } = require('./dispatched');
 
-class FluentDispatchCycle extends DispatchCycle {
+class FluentDispatchCycle {
 	dispatchTo(id, {ctx, table}) {
 		if (table.has(this.action)) {
 			table.get(this.action).call(ctx, this.params);
@@ -8,4 +8,4 @@ class FluentDispatchCycle extends DispatchCycle {
 	}
 }
 
-module.exports = FluentDispatchCycle;
+module.exports = define.DispatchCycle(FluentDispatchCycle);

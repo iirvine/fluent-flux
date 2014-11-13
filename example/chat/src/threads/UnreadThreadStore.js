@@ -35,7 +35,9 @@ var UnreadThreadStore = Dispatcher.createStore({
 	
 	handlers: [
 		changeHandler(clickThread),
-		changeHandler(receiveAll)
+		changeHandler(receiveAll, () => {
+			Dispatcher.dispatch(clickThread);
+		})
 	]
 });
 

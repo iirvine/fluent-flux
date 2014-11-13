@@ -3,18 +3,19 @@ var DefaultRegistry = require('./DefaultRegistry');
 var mixSpecIntoConstructor = require('./lib/mixSpecIntoConstructor');
 var { SpecRules, SpecPolicy } = require('./SpecPolicy');
 
-module.exports = function createDispatcher(spec) {
-	var Constructor = function() {
-		if (this.construct && typeof this.construct == 'function')
-			this.construct();
-	};
-
-	Constructor.prototype = new BaseDispatcher(spec.registry || new DefaultRegistry);
-	Constructor.prototype.constructor = Constructor;
+module.exports = function defineDispatcher(spec) {
+	class Dispatcher extends BaseDispatcher {
+		constructor() {
+			super(spec.registry || new DefaultRegistry());
+			if (this.construct && typeof this.construct === 'function') {
+				this.construct();
+			}
+		}
+	}
 
 	mixSpecIntoConstructor(
 		spec, 
-		Constructor,
+		Dispatcher,
 		BaseDispatcher, 
 		new SpecPolicy({
 			startDispatch: SpecRules.OVERRIDE_BASE,
@@ -25,5 +26,5 @@ module.exports = function createDispatcher(spec) {
 			construct: SpecRules.DEFINE_MANY
 		}));
 
-	return new Constructor();
-}
+	return Dispatcher;
+};

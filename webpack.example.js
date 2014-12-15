@@ -18,6 +18,7 @@ module.exports = {
     alias: {
         'fluent-flux': path.join(__dirname, "src", "index")
     },
+    modulesDirectories: ["web_modules", "node_modules", "src"],
     extensions: ["", ".webpack.js", ".web.js", ".js", ".jsx"]
   },
   plugins: [

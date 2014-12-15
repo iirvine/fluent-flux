@@ -3,15 +3,12 @@ var createDispatchRecord = require('./lib/createDispatchRecord');
 var { changeHandler } = require('./lib/handlers');
 var { anyPending } = require('./lib/storeHelpers');
 
-var ALL_ACTIONS = createAction(function () {}, "ALL_ACTIONS");
-
 var fluent = {
 	Dispatcher: require('./FluentDispatcher'),
-  ActionTypes: require('./ActionTypes'),
+  createApp: require('./lib/createApp'),
 	handler: createDispatchRecord,
 	changeHandler,
-	anyPending,
-	ALL_ACTIONS
+	anyPending
 };
 
 module.exports = fluent;

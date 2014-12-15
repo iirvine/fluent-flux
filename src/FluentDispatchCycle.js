@@ -1,4 +1,4 @@
-var { define } = require('./dispatched');
+var { define } = require('dispatched');
 
 class FluentDispatchCycle {
 	dispatchTo(id, {ctx, table}) {

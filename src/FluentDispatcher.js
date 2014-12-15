@@ -1,8 +1,8 @@
-var QueuedDispatcher = require('./dispatched/QueuedDispatcher');
+var QueuedDispatcher = require('dispatched/QueuedDispatcher');
 var FluentDispatchCycle = require('./FluentDispatchCycle');
 var createActions = require('./lib/createActions');
 var createStore = require('./lib/createStore');
-var { define } = require('./dispatched');
+var { define } = require('dispatched');
 
 class FluentDispatcher {
 	register(store) {

@@ -34,34 +34,4 @@ class ActionTypeMap {
   }
 }
 
-class DSL {
-  constructor(namespace, fn) {
-    this._namespace = namespace;
-    this.typeMap = new ActionTypeMap(namespace);
-    this.fn = fn;
-  }
-
-  actions(...actions) {
-    for (var i = 0; i < actions.length; i++) {
-      this.typeMap.tryPutAction(actions[i]);
-    }
-  }
-
-  namespace(namespace, fn) {
-    this.typeMap
-      .tryPutNamespace(
-        namespace, 
-        new DSL(namespace, fn).generate());
-  }
-
-  generate() {
-    this.fn.call(this);
-    return this.typeMap.build();
-  }
-}
-
-function ActionTypes(namespace, fn) {
-  return new DSL(namespace, fn).generate();
-}
-
-module.exports = ActionTypes;
+module.exports = ActionTypeMap;

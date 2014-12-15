@@ -21,6 +21,6 @@ var ChatApp = React.createClass({
 });
 
 React.render(
-	<ChatApp/>,
+	<ChatApp />,
 	document.body
 );

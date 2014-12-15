@@ -1,4 +1,4 @@
-var Dispatcher = require('../common/dispatcher');
+var Dispatcher = require('../core/dispatcher');
 var ChatMessageUtils = require('../utils/ChatMessageUtils');
 var { changeHandler } = require('fluent-flux');
 var { receiveAll } = require('../messages/MessageServerActions');

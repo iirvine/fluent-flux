@@ -1,16 +1,15 @@
-var Dispatcher = require('../common/dispatcher');
-var API = require('../common/API');
+var Dispatcher = require('../core/dispatcher');
+var API = require('../core/API');
+var MessageStore = require('./MessageStore');
+var ActionTypes = require('./ActionTypes');
 
 var MessageActions = Dispatcher.createActions({
-	
-	createMessage(text) {
-		var MessageStore = require('./MessageStore');  //watch for circular imports!
+  createMessage(text) {
 		var message = MessageStore.getCreatedMessageData(text);
 		
-		this.dispatch({text});
+		this.dispatch(ActionTypes.CREATE_MESSAGE(), {text});
 		API.createMessage(message);
-	},
-	
+	}
 });
 
 module.exports = MessageActions;

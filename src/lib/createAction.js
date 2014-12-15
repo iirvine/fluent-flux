@@ -7,8 +7,8 @@ module.exports = function createAction(fn, name, dispatcher) {
 		return name;
 	}
 
-	functor.dispatch = function(params) {
-		dispatcher.dispatch(functor, params)
+	functor.dispatch = function() {
+		dispatcher.dispatch.apply(dispatcher, arguments);
 	}
 
 	return functor;

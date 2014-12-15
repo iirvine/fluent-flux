@@ -7,6 +7,7 @@ var ALL_ACTIONS = createAction(function () {}, "ALL_ACTIONS");
 
 var fluent = {
 	Dispatcher: require('./FluentDispatcher'),
+  ActionTypes: require('./ActionTypes'),
 	handler: createDispatchRecord,
 	changeHandler,
 	anyPending,

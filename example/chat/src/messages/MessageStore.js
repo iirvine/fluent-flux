@@ -1,8 +1,7 @@
-var Dispatcher = require('../common/dispatcher');
+var Dispatcher = require('../core/dispatcher');
 var ThreadStore = require('../threads/ThreadStore');
 var ChatMessageUtils = require('../utils/ChatMessageUtils');
-var { createMessage } = require('./MessageActions');
-var { receiveAll } = require('./MessageServerActions');
+var ActionTypes = require('./ActionTypes');
 var { changeHandler } = require('fluent-flux');
 
 var dispatchToken = null;
@@ -64,12 +63,12 @@ var MessageStore = Dispatcher.createStore({
 	},
 
 	handlers: [
-		changeHandler(createMessage, (params) => {
+		changeHandler(ActionTypes.CREATE_MESSAGE(), (params) => {
 			var message = MessageStore.getCreatedMessageData(params.text);
 			messages[message.id] = message;
 		}),
 
-		changeHandler(receiveAll, (params) => {
+		changeHandler(ActionTypes.server.RECEIVE_ALL(), (params) => {
 			addMessages(params.rawMessages);
 			Dispatcher.waitFor(ThreadStore.getDispatchToken());
 			markAllInThreadRead(ThreadStore.getCurrentID());

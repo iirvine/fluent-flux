@@ -1,4 +1,4 @@
-var Dispatcher = require('../common/dispatcher');
+var Dispatcher = require('../core/dispatcher');
 
 var ThreadActions = Dispatcher.createActions({
 

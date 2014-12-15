@@ -8,6 +8,10 @@ module.exports = {
     photos: path.join(__dirname, "example", "photos", "src", "app.jsx"),
     chat: path.join(__dirname, "example", "chat", "src", "app.jsx")
   },
+  stats: {
+    errorDetails: true,
+    reasons: true
+  },
   output: {
     filename: "[name].js",
     chunkFileName: "[id].chunk.js",
@@ -15,10 +19,11 @@ module.exports = {
     publicPath: "/__build__/"
   },
   resolve: {
+    root: path.join(__dirname, "src", "packages"),
     alias: {
         'fluent-flux': path.join(__dirname, "src", "index")
     },
-    modulesDirectories: ["web_modules", "node_modules", "src"],
+    modulesDirectories: ["web_modules", "node_modules", "packages"],
     extensions: ["", ".webpack.js", ".web.js", ".js", ".jsx"]
   },
   plugins: [

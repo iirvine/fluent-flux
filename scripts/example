@@ -1,2 +1,2 @@
 #!/bin/sh
-node_modules/.bin/webpack-dev-server --inline --content-base example/ --colors --config webpack.example.js --port 8888
+node_modules/.bin/webpack-dev-server --inline --content-base example/ --colors --progress --display-reasons --display-error-details --config webpack.example.js --port 8888

@@ -1,4 +1,4 @@
-var Dispatcher = require('../core/dispatcher');
+var Dispatcher = require('../core/Dispatcher');
 var API = require('../core/API');
 var MessageStore = require('./MessageStore');
 var ActionTypes = require('./ActionTypes');

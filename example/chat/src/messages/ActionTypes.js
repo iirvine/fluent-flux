@@ -1,4 +1,4 @@
-var ChatApp = require('../core/ChatApp');
+var ChatApp = require('../ChatApp');
 var ActionTypes = require('fluent-action-types');
 
 var MessageActionTypes = ActionTypes('messages', function() {

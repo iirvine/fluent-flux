@@ -1,4 +1,4 @@
-var Dispatcher = require('../core/dispatcher');
+var Dispatcher = require('../core/Dispatcher');
 var ThreadStore = require('../threads/ThreadStore');
 var ChatMessageUtils = require('../utils/ChatMessageUtils');
 var ActionTypes = require('./ActionTypes');

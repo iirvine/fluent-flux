@@ -1,4 +1,4 @@
-var Dispatcher = require('../core/dispatcher');
+var Dispatcher = require('../core/Dispatcher');
 var ActionTypes = require('./ActionTypes');
 
 var MessageServerActions = Dispatcher.createActions({

@@ -148,7 +148,6 @@ React.render(
 Maintaining an ever-growing ActionTypes enum in "vanilla" flux seemed like an antipattern. It quickly became bothersome and error-prone - as did the nasty switch statement each store had to declare to act on those actions. Fluent uses a DSL approach to declaring the types of actions your application can emit, inspired by Ember's routing API. The [fluent-action-types](https://github.com/iirvine/fluent-action-types) package provides a simple API to build a hash of namespaced ActionType functions, which can be invoked to build an event string.
 
 ```js
-var ChatApp = require('../core/ChatApp');
 var ActionTypes = require('fluent-action-types');
 
 var MessageActionTypes = ActionTypes('messages', function() {

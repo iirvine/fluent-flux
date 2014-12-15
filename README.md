@@ -8,23 +8,38 @@ Fluent is a still-experimental implementation of Facebook's unidirectional [flux
 
 Here's a trivial app implemented with fluent - see the examples directory for a full working sample:
 
+*users/ActionTypes.js*
+```js
+var ActionTypes = require('fluent-action-types');
+
+var UserActionTypes = ActionTypes('users', function() {
+  this.actions(
+    'BUTTON_CLICKED',
+    'RECEIVE_USER'
+  );
+});
+
+module.exports = UserActionTypes;
+```
+
 *users/UserActions.js*
 ```js
 var Dispatcher = require('../common/dispatcher');
 var API = require('../common/API');
+var ActionTypes = require('./ActionTypes');
 
 var UserActions = Dispatcher.createActions({
   buttonClicked(user) {
     console.log(`${this.displayName()}(...): You clicked the user button!!`)
     
-    this.dispatch({user});
+    this.dispatch(ActionTypes.BUTTON_CLICKED(), {user});
     
     API.fetchUser(user)
       .then(UserActions.receiveUser);
   }, 
 
   receiveUser(user) {
-    this.dispatch({user});
+    this.dispatch(ActionTypes.RECEIVE_USER(), {user});
   }
 });
 
@@ -34,6 +49,7 @@ module.exports = UserActions
 *users/UserStore.js*
 ```js
 var Dispatcher = require('../common/dispatcher');
+var ActionTypes = require('./ActionTypes')
 var { changeHandler } = require('fluent-flux');
 var { buttonClicked, receiveUser } = require('./UserActions');
 
@@ -51,12 +67,12 @@ var UserStore = Dispatcher.createStore({
   },
 
   handlers: [
-    changeHandler(buttonClicked, (params) => {
+    changeHandler(ActionTypes.BUTTON_CLICKED(), (params) => {
       console.log("Fetching user...")
       UserStore.setPending();
     }),
     
-    changeHandler(receiveUser, (params) => {
+    changeHandler(ActionTypes.RECEIVE_USER(), (params) => {
       currentUser = {params};
       UserStore.resolve();
     })
@@ -128,10 +144,27 @@ React.render(
 
 ##Key Differences
 
-###No Constants
-Maintaining an ever-growing ActionTypes enum in "vanilla" flux seemed like an antipattern. It quickly became bothersome and error-prone - as did the nasty switch statement each store had to declare to act on those actions. Fluent takes a page out of reflux's book and treats action functions as first-class citizens - but unlike reflux, all actions are still pumped through a central dispatcher. Stores declare their interest in different actions by declaring handlers and registering them with the dispatcher.
+###ActionTypes API
+Maintaining an ever-growing ActionTypes enum in "vanilla" flux seemed like an antipattern. It quickly became bothersome and error-prone - as did the nasty switch statement each store had to declare to act on those actions. Fluent uses a DSL approach to declaring the types of actions your application can emit, inspired by Ember's routing API. The [fluent-action-types](https://github.com/iirvine/fluent-action-types) package provides a simple API to build a hash of namespaced ActionType functions, which can be invoked to build an event string.
 
-Under the hood, Fluent implements this API using ES6 Maps - a store's handlers are stored in a dispatch table, keyed on the actions each handler cares about. The dispatcher uses the object identity of each action being dispatched to route actions to the appropriate handlers.
+```js
+var ChatApp = require('../core/ChatApp');
+var ActionTypes = require('fluent-action-types');
+
+var MessageActionTypes = ActionTypes('messages', function() {
+  this.actions('CREATE_MESSAGE');
+  
+  this.namespace('server', function() {
+    this.actions(
+      'RECEIVE_ALL',
+      'RECEIVE_CREATED_MESSAGE'
+    );
+  });
+});
+
+MessageActionTypes.CREATE_MESSAGE() //returns event key - messages:CREATE_MESSAGE
+MessageActionTypes.server.RECEIVE_ALL() //returns event key - messages:server:RECEIVE_ALL
+```
 
 ###Factory Functions
 Due to being reference implementations, the original flux examples didn't have much abstraction to them. Fluent includes convenient factory functions for creating stores and actions, as well as helpers like `anyPending` to see if any stores have asynchronous operations pending, like an in-flight request.

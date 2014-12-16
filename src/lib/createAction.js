@@ -3,10 +3,6 @@ module.exports = function createAction(fn, name, dispatcher) {
 			fn.apply(functor, arguments);
 	}
 
-	functor.displayName = function() {
-		return name;
-	}
-
 	functor.dispatch = function() {
 		dispatcher.dispatch.apply(dispatcher, arguments);
 	}

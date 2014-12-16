@@ -4,14 +4,14 @@ var ActionTypes = require('./ActionTypes');
 var MessageServerActions = Dispatcher.createActions({
 	receiveAll(rawMessages) {
 		this.dispatch(
-      ActionTypes.server.RECEIVE_ALL(), 
+      ActionTypes.server.RECEIVE_ALL, 
       {rawMessages}
     );
 	},
 
 	receiveCreatedMessage(createdMessage) {
 		this.dispatch(
-      ActionTypes.server.RECEIVE_CREATED_MESSAGE(), 
+      ActionTypes.server.RECEIVE_CREATED_MESSAGE, 
       {createdMessage}
     );
 	}

@@ -1,7 +1,5 @@
-module.exports = function FluentApp(spec) {
-  return {
-    addActionTypes() {
-      
-    }
-  }
+var FluentApp = require('./FluentApp')
+
+module.exports = function createApp(spec) {
+  return new FluentApp()
 }

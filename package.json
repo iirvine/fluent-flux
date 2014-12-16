@@ -21,7 +21,9 @@
   "homepage": "https://github.com/iirvine/fluent-flux",
   "dependencies": {
     "es6-map": "^0.1.1",
-    "object-assign": "^1.0.0"
+    "es6-set": "^0.1.1",
+    "object-assign": "^1.0.0",
+    "object.assign": "^1.1.1"
   },
   "devDependencies": {
     "browserify": "^6.2.0",

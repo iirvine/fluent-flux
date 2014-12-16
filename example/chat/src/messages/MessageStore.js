@@ -63,12 +63,12 @@ var MessageStore = Dispatcher.createStore({
 	},
 
 	handlers: [
-		changeHandler(ActionTypes.CREATE_MESSAGE(), (params) => {
+		changeHandler(ActionTypes.CREATE_MESSAGE, (params) => {
 			var message = MessageStore.getCreatedMessageData(params.text);
 			messages[message.id] = message;
 		}),
 
-		changeHandler(ActionTypes.server.RECEIVE_ALL(), (params) => {
+		changeHandler(ActionTypes.server.RECEIVE_ALL, (params) => {
 			addMessages(params.rawMessages);
 			Dispatcher.waitFor(ThreadStore.getDispatchToken());
 			markAllInThreadRead(ThreadStore.getCurrentID());

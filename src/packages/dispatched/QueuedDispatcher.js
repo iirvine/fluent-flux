@@ -11,7 +11,7 @@ var QueuedDispatcher = {
 			warning(
 				!this.isDispatching(),
 				'Dispatcher.dispatch(...): Cascading dispatch detected. \n' +
-				`You have tried to dispatch an action of type '${action.displayName()}' while simultaneously dispatching an action of type '${this.currentDispatch.action.displayName()}'. ` +
+				`You have tried to dispatch an action of type '${action}' while simultaneously dispatching an action of type '${this.currentDispatch.action}'. ` +
 				'This action will be queued until the pending payload has finished dispatching. ' +
 				'Actions should avoid cascading updates wherever possible.'
 			);

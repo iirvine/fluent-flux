@@ -7,7 +7,7 @@ var MessageActions = Dispatcher.createActions({
   createMessage(text) {
 		var message = MessageStore.getCreatedMessageData(text);
 		
-		this.dispatch(ActionTypes.CREATE_MESSAGE(), {text});
+		this.dispatch(ActionTypes.CREATE_MESSAGE, {text});
 		API.createMessage(message);
 	}
 });

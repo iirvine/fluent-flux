@@ -4,4 +4,4 @@ module.exports = function ActionTypes(namespace, fn) {
   return new DSL(namespace, fn).generate();
 }
 
-module.exports.ActionTypeMap = require('./ActionTypeMap');
+module.exports.ActionNamespace = require('./ActionNamespace');

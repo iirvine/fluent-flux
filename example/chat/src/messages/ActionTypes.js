@@ -1,7 +1,7 @@
 var ChatApp = require('../ChatApp');
 var ActionTypes = require('fluent-action-types');
 
-var MessageActionTypes = ActionTypes('messages', function() {
+var MessageActionTypes = ChatApp.addActionTypes('messages', function() {
   this.actions('CREATE_MESSAGE');
   
   this.namespace('server', function() {
@@ -11,7 +11,5 @@ var MessageActionTypes = ActionTypes('messages', function() {
     );
   });
 });
-
-ChatApp.addActionTypes(MessageActionTypes);
 
 module.exports = MessageActionTypes;

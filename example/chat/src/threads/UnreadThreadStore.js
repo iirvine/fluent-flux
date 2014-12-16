@@ -2,9 +2,9 @@ var Dispatcher = require('../core/Dispatcher');
 var ChatMessageUtils = require('../utils/ChatMessageUtils');
 var ThreadStore = require('./ThreadStore');
 var MessageStore = require('../messages/MessageStore');
+var ThreadActionTypes = require('./ActionTypes');
+var MessageActionTypes = require('../messages/ActionTypes')
 var { changeHandler } = require('fluent-flux');
-var { clickThread } = require('./ThreadActions');
-var { receiveAll } = require('../messages/MessageServerActions');
 
 var dispatchToken = null;
 
@@ -34,9 +34,9 @@ var UnreadThreadStore = Dispatcher.createStore({
 	},
 	
 	handlers: [
-		changeHandler(clickThread),
-		changeHandler(receiveAll, () => {
-			Dispatcher.dispatch(clickThread);
+		changeHandler(ThreadActionTypes.CLICK_THREAD),
+		changeHandler(MessageActionTypes.server.RECEIVE_ALL, () => {
+			Dispatcher.dispatch(ThreadActionTypes.CLICK_THREAD);
 		})
 	]
 });

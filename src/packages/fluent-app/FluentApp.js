@@ -1,17 +1,18 @@
+var ActionTypes = require('fluent-action-types');
+var {ActionNamespace} = ActionTypes
+
 class FluentApp {
   constructor() {
-
+    this.actionTypes = new ActionNamespace(this.displayName || "FluentApp")
   }
-  
-  initialize() {
 
+  addActionTypes(namespace, fn) {
+    var hash = ActionTypes(namespace, fn);
+    this.actionTypes.tryPutNamespace(namespace, hash)
+    return this.actionTypes
+      .getNamespace(namespace)
+      .build();
   }
-}
-
-FluentApp.create = function(Application) {
-  var app = new Application();
-  app.initialize();
-  return app;
 }
 
 module.exports = FluentApp

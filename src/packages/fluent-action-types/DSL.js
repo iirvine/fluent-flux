@@ -1,9 +1,9 @@
-var ActionTypeMap = require('./ActionTypeMap');
+var ActionNamespace = require('./ActionNamespace');
 
 class DSL {
   constructor(namespace, fn) {
     this._namespace = namespace;
-    this.typeMap = new ActionTypeMap(namespace);
+    this.typeMap = new ActionNamespace(namespace);
     this.fn = fn;
   }
 

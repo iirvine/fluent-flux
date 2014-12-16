@@ -32,14 +32,14 @@ var UserActions = Dispatcher.createActions({
   buttonClicked(user) {
     console.log(`${this.displayName()}(...): You clicked the user button!!`)
     
-    this.dispatch(ActionTypes.BUTTON_CLICKED(), {user});
+    this.dispatch(ActionTypes.BUTTON_CLICKED, {user});
     
     API.fetchUser(user)
       .then(UserActions.receiveUser);
   }, 
 
   receiveUser(user) {
-    this.dispatch(ActionTypes.RECEIVE_USER(), {user});
+    this.dispatch(ActionTypes.RECEIVE_USER, {user});
   }
 });
 
@@ -67,12 +67,12 @@ var UserStore = Dispatcher.createStore({
   },
 
   handlers: [
-    changeHandler(ActionTypes.BUTTON_CLICKED(), (params) => {
+    changeHandler(ActionTypes.BUTTON_CLICKED, (params) => {
       console.log("Fetching user...")
       UserStore.setPending();
     }),
     
-    changeHandler(ActionTypes.RECEIVE_USER(), (params) => {
+    changeHandler(ActionTypes.RECEIVE_USER, (params) => {
       currentUser = {params};
       UserStore.resolve();
     })
@@ -161,8 +161,8 @@ var MessageActionTypes = ActionTypes('messages', function() {
   });
 });
 
-MessageActionTypes.CREATE_MESSAGE() //returns event key - messages:CREATE_MESSAGE
-MessageActionTypes.server.RECEIVE_ALL() //returns event key - messages:server:RECEIVE_ALL
+console.log(MessageActionTypes.CREATE_MESSAGE)     //logs 'messages:CREATE_MESSAGE'
+console.log(MessageActionTypes.server.RECEIVE_ALL) //logs 'messages:server:RECEIVE_ALL'
 ```
 
 ###Factory Functions

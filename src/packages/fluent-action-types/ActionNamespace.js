@@ -40,7 +40,7 @@ class ActionNamespace {
   getNamespace(namespace) {
     invariant(
       this._namespaces.has(namespace),
-      `Namespace ${namespace} does not exist.`
+      `Namespace ${namespace} does not exist in parent namespace ${this.name}.`
     );
 
     return this._namespaces.get(namespace);
